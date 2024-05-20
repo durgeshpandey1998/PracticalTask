@@ -1,0 +1,185 @@
+﻿@model DataAccessLayer.DataBaseTable.TblUserRegistration
+
+@{
+    ViewData["Title"] = "RegisterData";
+}
+
+<h1>RegisterData</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="RegisterData">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @*<div class="form-group">
+            <label asp-for="Id" class="control-label"></label>
+            <input asp-for="Id" class="form-control" />
+            <span asp-validation-for="Id" class="text-danger"></span>
+            </div>*@
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input id="name" asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input id="email" asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input id="phone" asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Address" class="control-label"></label>
+                <input id="address" asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StateId" class="control-label">State Name</label>
+                @*<input asp-for="StateId" class="form-control" />*@
+                <select id="satetName" class="form-control">
+                    <option value="0">
+                        --Select Country--
+                    </option>
+                </select>
+                <span asp-validation-for="StateId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CityId" class="control-label">City Name</label>
+                @*<input asp-for="CityId" class="form-control" />*@
+                <select id="cityName" class="form-control">
+                    <option value="0">
+                        --Select City--
+                    </option>
+                </select>
+                <span asp-validation-for="CityId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Agree ?</label>
+                <input type="checkbox" id="iAgree" name='chkBestSeller' value="Agree">
+            </div>
+            <div class="form-group">
+                <input type="button" onclick="RegisterData()" value="Register" class="btn btn-primary" id="myButton" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="DisplayUser">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.19/dist/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.19/dist/sweetalert2.min.css">
+
+<script>
+    $(document).ready(function () {
+        //document.getElementById('myButton').style.visibility = 'hidden';
+        $('#myButton').prop('disabled', true);
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetAllState", "Home")',
+            dataType: "json",
+            traditional: true,
+            success: function (res) {
+                var state = "<select id='satetName'>";
+                state = state + '<option value="">--Select--</option>';
+                for (var i = 0; i < res.length; i++) {
+                    state = state + '<option value=' + res[i].id + '>' + res[i].stateName + '</option>';
+                }
+                state = state + '</select>';
+                $('#satetName').html(state);
+            }
+
+        });
+
+    })
+
+    $('#satetName').change(function () {
+        $.ajax({
+            type: "post",
+            url: '@Url.Action("GetAllCity", "Home")',
+            data: { stateId: $('#satetName').val() },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                var district = "<select id='cityName'>";
+                district = district + '<option value="">--Select--</option>';
+                for (var i = 0; i < data.length; i++) {
+                    district = district + '<option value=' + data[i].id + '>' + data[i].cityName + '</option>';
+                }
+                district = district + '</select>';
+                $('#cityName').html(district);
+            }
+        });
+    });
+    $('input[name="chkBestSeller"]').click(function () {
+
+        //if (this.checked) {
+        //    document.getElementById('myButton').style.visibility = 'visible';
+        //} else {
+        //    document.getElementById('myButton').style.visibility = 'hidden';
+        //}
+        if (this.checked) {
+            $('#myButton').prop('disabled', false);
+        } else {
+            $('#myButton').prop('disabled', true);
+        }
+
+    });
+
+    function RegisterData() {
+        var tblUserRegistration = {
+            Name: $("#name").val(),
+            Email: $("#email").val(),
+            Phone: $("#phone").val(),
+            Address: $("#address").val(),
+            StateId: $('#satetName').val(),
+            CityId: $('#cityName').val()
+        };
+        $.ajax({
+            url: "/Home/RegisterData",
+            type: "POST",
+            data: { tblUserRegistration: tblUserRegistration },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Saved!',
+                        text: 'Your file has been saved.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "http://localhost:29775/Home/DisplayUser";
+                        }
+                    });
+                }
+                else{
+                    Swal.fire(
+                        'Failed!',
+                        'Data can not be null.',
+                        'warning'
+                    )
+                }
+            },
+            error: function (request, status, error) {
+                Swal.fire(
+                    'Failed!',
+                    'Failed to Add Record.',
+                    'warning'
+                )
+            }
+        });
+    }
+
+</script>
+
+

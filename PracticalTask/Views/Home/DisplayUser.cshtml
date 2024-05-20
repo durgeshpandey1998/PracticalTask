@@ -1,0 +1,312 @@
+﻿@model IEnumerable<DataAccessLayer.DataBaseTable.TblUserRegistration>
+
+@{
+    ViewData["Title"] = "DisplayUser";
+}
+
+<h1>DisplayUser</h1>
+
+<p>
+    <a asp-action="RegisterData">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Address)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Address)
+            </td>
+            <td>
+                    <button id="launchModel" onclick="openModel(@item.Id)" type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                        Edit
+                    </button>
+               @* @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ })*@ |
+                    <button id="delete" onclick="deleteFunction(@item.Id)" type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#exampleModal">
+                        Delete
+                    </button>
+                @*@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })*@
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+
+
+
+
+<!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Form</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label class="control-label">Name</label>
+                    <input id="id" class="form-control" hidden/>
+                    <input id="name" class="form-control" />
+
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Email</label>
+                    <input id="email" class="form-control" />
+
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Phone</label>
+                    <input id="phone" class="form-control" />
+
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Address</label>
+                    <input id="address" class="form-control" />
+
+                </div>
+                <div class="form-group">
+                    <label class="control-label">State Name</label>
+                    @*<input asp-for="StateId" class="form-control" />*@
+                    <select id="satetName" class="form-control">
+                        <option value="0">
+                            --Select Country--
+                        </option>
+                    </select>
+
+                </div>
+                <div class="form-group">
+                    <label class="control-label">City Name</label>
+                    @*<input asp-for="CityId" class="form-control" />*@
+                    <select id="cityName" class="form-control">
+                        <option value="0">
+                            --Select City--
+                        </option>
+                    </select>
+                </div>
+                @*<div class="form-group">
+                    <label class="control-label">Agree ?</label>
+                    <input type="checkbox" id="iAgree" name='chkBestSeller' value="Agree">
+                </div>*@
+            </div>
+            <div class="modal-footer">
+                <button id="modelClose"type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" onclick="UpdateUser()" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.19/dist/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.19/dist/sweetalert2.min.css">
+<script>
+    $(document).ready(function () {
+
+    })
+    var stateIds=0;
+    var cityIds=0;
+    function openModel(id)
+    {
+
+        $.ajax({
+            type: "post",
+            url: '@Url.Action("GetUserById", "Home")',
+            data: { userId: id },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    $('#id').val(data[i].id);
+                    $('#name').val(data[i].name);
+                     $('#email').val(data[i].email);
+                      $('#phone').val(data[i].phone);
+                       $('#address').val(data[i].address);
+                       stateIds=data[i].stateId;
+                       cityIds= data[i].cityId;
+                }
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetAllState", "Home")',
+                    dataType: "json",
+                    traditional: true,
+                    success: function (res) {
+                        var state = "<select id='satetName'>";
+                        state = state + '<option value="">--Select State--</option>';
+                        for (var i = 0; i < res.length; i++) {
+                            if (stateIds == res[i].id) {
+                                state = state + '<option selected="selected" value=' + res[i].id + '>' + res[i].stateName + '</option>';
+                            }
+                            else {
+                                state = state + '<option value=' + res[i].id + '>' + res[i].stateName + '</option>';
+                            }
+                        }
+                        state = state + '</select>';
+                        $('#satetName').html(state);
+                    }
+
+                });
+                LoadCityDropdown(stateIds);
+            }
+        });
+        $('#exampleModal').modal('show');
+
+    }
+    $('.close').on('click', function () {
+        $('#exampleModal').modal('hide');
+    });
+    $('#modelClose').on('click', function () {
+        $('#exampleModal').modal('hide');
+    });
+
+    $('#satetName').change(function () {
+        var stateid = $('#satetName').val();
+        LoadCityDropdown(stateid);
+    });
+
+
+    function LoadCityDropdown(stateid) {
+        $.ajax({
+            type: "post",
+            url: '@Url.Action("GetAllCity", "Home")',
+                            data: { stateId: stateid },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                var district = "<select id='cityName'>";
+                district = district + '<option value="">--Select--</option>';
+                for (var i = 0; i < data.length; i++) {
+                    if (cityIds == data[i].id) {
+                        district = district + '<option selected="selected" value=' + data[i].id + '>' + data[i].cityName + '</option>';
+                    }
+                    else {
+                    district = district + '<option value=' + data[i].id + '>' + data[i].cityName + '</option>';
+                    }
+                }
+                district = district + '</select>';
+                $('#cityName').html(district);
+            }
+        });
+    }
+
+
+    function UpdateUser() {
+        var tblUserRegistration = {
+            Id : $("#id").val(),
+            Name: $("#name").val(),
+            Email: $("#email").val(),
+            Phone: $("#phone").val(),
+            Address: $("#address").val(),
+            StateId: $('#satetName').val(),
+            CityId: $('#cityName').val()
+        }
+        console.log(tblUserRegistration)
+        $.ajax({
+            url: "/Home/RegisterData",
+            type: "POST",
+            data: { tblUserRegistration: tblUserRegistration },
+            success: function (response) {
+                //alert("Update Success");
+                //$('#exampleModal').modal('hide');
+                //location.href = "https://localhost:7197/Home/DisplayUser";
+                Swal.fire({
+                    title: 'Saved!',
+                    text: 'Your file has been updated.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#exampleModal').modal('hide');
+                        window.location.href = "http://localhost:29775/Home/DisplayUser";
+                    }
+                });
+            },
+            error: function (request, status, error) {
+                Swal.fire(
+                    'Failed!',
+                    'Failed to Add Record.',
+                    'warning'
+                )
+            }
+        });
+    }
+
+
+                    function deleteFunction(id)
+                    {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/Home/DeleUser",
+                    type: "POST",
+                    data: { Id: id },
+                    success: function (response) {
+                        Swal.fire(
+                            'Deleted!',
+                            'Your file has been deleted.',
+                            'success'
+                        )
+                        location.href = "http://localhost:29775/Home/DisplayUser";
+                    },
+                    error: function (request, status, error) {
+                        Swal.fire(
+                            'Failed!',
+                            'Failed to delete.',
+                            'warning'
+                        )
+                    }
+                });
+
+            }
+        })
+                    }
+</script>
